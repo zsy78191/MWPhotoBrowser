@@ -1617,7 +1617,11 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
             }];
             // iOS 8 - Set the Anchor Point for the popover
             if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8")) {
-                self.activityViewController.popoverPresentationController.barButtonItem = _actionButton;
+                if (@available(iOS 8.0, *)) {
+                    self.activityViewController.popoverPresentationController.barButtonItem = _actionButton;
+                } else {
+                    // Fallback on earlier versions
+                }
             }
             [self presentViewController:self.activityViewController animated:YES completion:nil];
 

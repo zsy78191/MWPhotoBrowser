@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
   s.name = 'Fork-MWPhotoBrowser'
-  s.version = '2.1.3'
+  s.version = '2.1.5'
   s.license = 'MIT'
   s.summary = 'A simple iOS photo and video browser with optional grid view, captions and selections.'
   s.description = <<-DESCRIPTION
@@ -25,7 +25,7 @@ Pod::Spec.new do |s|
 
   s.source = {
     :git => 'https://github.com/zsy78191/MWPhotoBrowser.git',
-    :tag => '2.1.3'
+    :tag => '2.1.5'
   }
   s.platform = :ios, '7.0'
   s.source_files = 'Pod/Classes/**/*'
@@ -43,6 +43,6 @@ Pod::Spec.new do |s|
   # SDWebImage
   # 3.7.2 contains bugs downloading local files
   # https://github.com/rs/SDWebImage/issues/1109
-  s.dependency 'SDWebImage', '~> 4.4.6' 
+  s.dependency 'SDWebImage' , '~> 5.0.0'
 
 end

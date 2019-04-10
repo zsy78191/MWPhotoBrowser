@@ -9,10 +9,12 @@
 //#import <SDWebImage/SDWebImageDecoder.h>
 #import <SDWebImage/SDWebImageManager.h>
 #import <SDWebImage/SDWebImageOperation.h>
+#import <SDWebImage/SDWebImageTransition.h>
 #import <AssetsLibrary/AssetsLibrary.h>
 #import "MWPhoto.h"
 #import "MWPhotoBrowser.h"
 
+API_AVAILABLE(ios(8.0))
 @interface MWPhoto () {
 
     BOOL _loadingInProgress;
@@ -46,7 +48,7 @@
     return [[MWPhoto alloc] initWithURL:url];
 }
 
-+ (MWPhoto *)photoWithAsset:(PHAsset *)asset targetSize:(CGSize)targetSize {
++ (MWPhoto *)photoWithAsset:(PHAsset *)asset targetSize:(CGSize)targetSize  API_AVAILABLE(ios(8.0)){
     return [[MWPhoto alloc] initWithAsset:asset targetSize:targetSize];
 }
 
@@ -80,11 +82,15 @@
     return self;
 }
 
-- (id)initWithAsset:(PHAsset *)asset targetSize:(CGSize)targetSize {
+- (id)initWithAsset:(PHAsset *)asset targetSize:(CGSize)targetSize  API_AVAILABLE(ios(8.0)){
     if ((self = [super init])) {
         self.asset = asset;
         self.assetTargetSize = targetSize;
-        self.isVideo = asset.mediaType == PHAssetMediaTypeVideo;
+        if (@available(iOS 8.0, *)) {
+            self.isVideo = asset.mediaType == PHAssetMediaTypeVideo;
+        } else {
+            // Fallback on earlier versions
+        }
         [self setup];
     }
     return self;
@@ -119,24 +125,28 @@
 - (void)getVideoURL:(void (^)(NSURL *url))completion {
     if (_videoURL) {
         completion(_videoURL);
-    } else if (_asset && _asset.mediaType == PHAssetMediaTypeVideo) {
-        [self cancelVideoRequest]; // Cancel any existing
-        PHVideoRequestOptions *options = [PHVideoRequestOptions new];
-        options.networkAccessAllowed = YES;
-        typeof(self) __weak weakSelf = self;
-        _assetVideoRequestID = [[PHImageManager defaultManager] requestAVAssetForVideo:_asset options:options resultHandler:^(AVAsset *asset, AVAudioMix *audioMix, NSDictionary *info) {
-            
-            // dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 3 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{ // Testing
-            typeof(self) strongSelf = weakSelf;
-            if (!strongSelf) return;
-            strongSelf->_assetVideoRequestID = PHInvalidImageRequestID;
-            if ([asset isKindOfClass:[AVURLAsset class]]) {
-                completion(((AVURLAsset *)asset).URL);
-            } else {
-                completion(nil);
-            }
-            
-        }];
+    } else if (@available(iOS 8.0, *)) {
+        if (_asset && _asset.mediaType == PHAssetMediaTypeVideo) {
+            [self cancelVideoRequest]; // Cancel any existing
+            PHVideoRequestOptions *options = [PHVideoRequestOptions new];
+            options.networkAccessAllowed = YES;
+            typeof(self) __weak weakSelf = self;
+            _assetVideoRequestID = [[PHImageManager defaultManager] requestAVAssetForVideo:_asset options:options resultHandler:^(AVAsset *asset, AVAudioMix *audioMix, NSDictionary *info) {
+                
+                // dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 3 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{ // Testing
+                typeof(self) strongSelf = weakSelf;
+                if (!strongSelf) return;
+                strongSelf->_assetVideoRequestID = PHInvalidImageRequestID;
+                if ([asset isKindOfClass:[AVURLAsset class]]) {
+                    completion(((AVURLAsset *)asset).URL);
+                } else {
+                    completion(nil);
+                }
+                
+            }];
+        }
+    } else {
+        // Fallback on earlier versions
     }
 }
 
@@ -212,6 +222,12 @@
 // Load from local file
 - (void)_performLoadUnderlyingImageAndNotifyWithWebURL:(NSURL *)url {
     @try {
+        NSString* urlString = [url absoluteString];
+        if ([urlString hasPrefix:@"thumb"]) {
+            urlString = [urlString substringFromIndex:5];
+            NSLog(@"-- %@",urlString);
+            url = [NSURL URLWithString:urlString];
+        }
         SDWebImageManager *manager = [SDWebImageManager sharedManager];
         __weak typeof(self) weakSelf = self;
         _webImageOperation = [manager loadImageWithURL:url options:0 progress:^(NSInteger receivedSize, NSInteger expectedSize, NSURL * _Nullable targetURL) {
@@ -227,7 +243,7 @@
                 MWLog(@"SDWebImage failed to download image: %@", error);
             }
             weakSelf.webImageOperation = nil;
-            weakSelf.underlyingImage = image;
+            
             dispatch_async(dispatch_get_main_queue(), ^{
                 [weakSelf imageLoadingComplete];
             });
@@ -257,7 +273,7 @@
         @autoreleasepool {
             @try {
                 self.underlyingImage = [UIImage imageWithContentsOfFile:url.path];
-                if (!_underlyingImage) {
+                if (!self.underlyingImage) {
                     MWLog(@"Error loading photo from path: %@", url.path);
                 }
             } @finally {
@@ -296,28 +312,36 @@
 }
 
 // Load from photos library
-- (void)_performLoadUnderlyingImageAndNotifyWithAsset:(PHAsset *)asset targetSize:(CGSize)targetSize {
+- (void)_performLoadUnderlyingImageAndNotifyWithAsset:(PHAsset *)asset targetSize:(CGSize)targetSize  API_AVAILABLE(ios(8.0)){
     
-    PHImageManager *imageManager = [PHImageManager defaultManager];
-    
-    PHImageRequestOptions *options = [PHImageRequestOptions new];
-    options.networkAccessAllowed = YES;
-    options.resizeMode = PHImageRequestOptionsResizeModeFast;
-    options.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
-    options.synchronous = false;
-    options.progressHandler = ^(double progress, NSError *error, BOOL *stop, NSDictionary *info) {
-        NSDictionary* dict = [NSDictionary dictionaryWithObjectsAndKeys:
-                              [NSNumber numberWithDouble: progress], @"progress",
-                              self, @"photo", nil];
-        [[NSNotificationCenter defaultCenter] postNotificationName:MWPHOTO_PROGRESS_NOTIFICATION object:dict];
-    };
-    
-    _assetRequestID = [imageManager requestImageForAsset:asset targetSize:targetSize contentMode:PHImageContentModeAspectFit options:options resultHandler:^(UIImage *result, NSDictionary *info) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            self.underlyingImage = result;
-            [self imageLoadingComplete];
-        });
-    }];
+    if (@available(iOS 8.0, *)) {
+        PHImageManager *imageManager = [PHImageManager defaultManager];
+        
+        PHImageRequestOptions *options = [PHImageRequestOptions new];
+        options.networkAccessAllowed = YES;
+        options.resizeMode = PHImageRequestOptionsResizeModeFast;
+        options.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
+        options.synchronous = false;
+        options.progressHandler = ^(double progress, NSError *error, BOOL *stop, NSDictionary *info) {
+            NSDictionary* dict = [NSDictionary dictionaryWithObjectsAndKeys:
+                                  [NSNumber numberWithDouble: progress], @"progress",
+                                  self, @"photo", nil];
+            [[NSNotificationCenter defaultCenter] postNotificationName:MWPHOTO_PROGRESS_NOTIFICATION object:dict];
+        };
+        
+        _assetRequestID = [imageManager requestImageForAsset:asset targetSize:targetSize contentMode:PHImageContentModeAspectFit options:options resultHandler:^(UIImage *result, NSDictionary *info) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                self.underlyingImage = result;
+                [self imageLoadingComplete];
+            });
+        }];
+    } else {
+        // Fallback on earlier versions
+    }if (@available(iOS 8.0, *)) {
+        PHImageManager *imageManager = [PHImageManager defaultManager];
+    } else {
+        // Fallback on earlier versions
+    }
 
 }
 
@@ -351,14 +375,22 @@
 
 - (void)cancelImageRequest {
     if (_assetRequestID != PHInvalidImageRequestID) {
-        [[PHImageManager defaultManager] cancelImageRequest:_assetRequestID];
+        if (@available(iOS 8.0, *)) {
+            [[PHImageManager defaultManager] cancelImageRequest:_assetRequestID];
+        } else {
+            // Fallback on earlier versions
+        }
         _assetRequestID = PHInvalidImageRequestID;
     }
 }
 
 - (void)cancelVideoRequest {
     if (_assetVideoRequestID != PHInvalidImageRequestID) {
-        [[PHImageManager defaultManager] cancelImageRequest:_assetVideoRequestID];
+        if (@available(iOS 8.0, *)) {
+            [[PHImageManager defaultManager] cancelImageRequest:_assetVideoRequestID];
+        } else {
+            // Fallback on earlier versions
+        }
         _assetVideoRequestID = PHInvalidImageRequestID;
     }
 }
