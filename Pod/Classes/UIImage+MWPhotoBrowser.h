@@ -12,5 +12,5 @@
 
 + (UIImage *)imageForResourcePath:(NSString *)path ofType:(NSString *)type inBundle:(NSBundle *)bundle;
 + (UIImage *)clearImageWithSize:(CGSize)size;
-
+- (UIImage *)resizeToSize:(CGSize)reSize;
 @end

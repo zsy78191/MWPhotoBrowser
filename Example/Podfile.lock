@@ -1,9 +1,9 @@
 PODS:
   - DACircularProgress (2.3.1)
-  - Fork-MWPhotoBrowser (2.1.4):
+  - Fork-MWPhotoBrowser (2.1.5):
     - DACircularProgress (~> 2.3)
     - MBProgressHUD (~> 0.9)
-    - SDWebImage
+    - SDWebImage (~> 4.4.6)
   - MBProgressHUD (0.9.2)
   - SDWebImage (4.4.6):
     - SDWebImage/Core (= 4.4.6)
@@ -24,7 +24,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   DACircularProgress: 4dd437c0fc3da5161cb289e07ac449493d41db71
-  Fork-MWPhotoBrowser: 03e7ac9c4b81ab059705e755f13c5ff325fbe908
+  Fork-MWPhotoBrowser: f3bc0dcf32cb6b6c820108d39bec4fbc79a8091c
   MBProgressHUD: 1569cf7ace17a8bac47aabfbb8580a49690386d1
   SDWebImage: 3f3f0c02f09798048c47a5ed0a13f17b063572d8
 

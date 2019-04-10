@@ -21,7 +21,7 @@ Pod::Spec.new do |s|
 
   s.homepage = 'https://github.com/zsy78191/MWPhotoBrowser'
   s.author = { 'Michael Waterfall' => 'michaelwaterfall@gmail.com' }
-  s.social_media_url = 'https://twitter.com/mwaterfall'
+  # s.social_media_url = 'https://twitter.com/mwaterfall'
 
   s.source = {
     :git => 'https://github.com/zsy78191/MWPhotoBrowser.git',
@@ -43,6 +43,6 @@ Pod::Spec.new do |s|
   # SDWebImage
   # 3.7.2 contains bugs downloading local files
   # https://github.com/rs/SDWebImage/issues/1109
-  s.dependency 'SDWebImage' , '~> 5.0.0'
+  s.dependency 'SDWebImage', '~> 4.4.6'
 
 end

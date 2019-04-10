@@ -13,6 +13,7 @@
 #import <AssetsLibrary/AssetsLibrary.h>
 #import "MWPhoto.h"
 #import "MWPhotoBrowser.h"
+#import "UIImage+MWPhotoBrowser.h"
 
 API_AVAILABLE(ios(8.0))
 @interface MWPhoto () {
@@ -209,7 +210,11 @@ API_AVAILABLE(ios(8.0))
     } else if (_asset) {
         
         // Load from photos asset
-        [self _performLoadUnderlyingImageAndNotifyWithAsset: _asset targetSize:_assetTargetSize];
+        if (@available(iOS 8.0, *)) {
+            [self _performLoadUnderlyingImageAndNotifyWithAsset: _asset targetSize:_assetTargetSize];
+        } else {
+            // Fallback on earlier versions
+        }
         
     } else {
         
@@ -223,14 +228,16 @@ API_AVAILABLE(ios(8.0))
 - (void)_performLoadUnderlyingImageAndNotifyWithWebURL:(NSURL *)url {
     @try {
         NSString* urlString = [url absoluteString];
+        __block BOOL isThumb = NO;
         if ([urlString hasPrefix:@"thumb"]) {
+            isThumb = YES;
             urlString = [urlString substringFromIndex:5];
-            NSLog(@"-- %@",urlString);
+//            NSLog(@"-- %@",urlString);
             url = [NSURL URLWithString:urlString];
         }
         SDWebImageManager *manager = [SDWebImageManager sharedManager];
         __weak typeof(self) weakSelf = self;
-        _webImageOperation = [manager loadImageWithURL:url options:0 progress:^(NSInteger receivedSize, NSInteger expectedSize, NSURL * _Nullable targetURL) {
+        _webImageOperation = [manager loadImageWithURL:url options:SDWebImageScaleDownLargeImages|SDWebImageForceTransition progress:^(NSInteger receivedSize, NSInteger expectedSize, NSURL * _Nullable targetURL) {
             if (expectedSize > 0) {
                 float progress = receivedSize / (float)expectedSize;
                 NSDictionary* dict = [NSDictionary dictionaryWithObjectsAndKeys:
@@ -243,8 +250,14 @@ API_AVAILABLE(ios(8.0))
                 MWLog(@"SDWebImage failed to download image: %@", error);
             }
             weakSelf.webImageOperation = nil;
-            
             dispatch_async(dispatch_get_main_queue(), ^{
+                if (0 && isThumb) {
+                    NSData* d = UIImageJPEGRepresentation(image, 0.2);
+                    weakSelf.underlyingImage = [UIImage imageWithData:d];
+                }
+                else {
+                    weakSelf.underlyingImage = image;
+                }
                 [weakSelf imageLoadingComplete];
             });
         }];
@@ -335,10 +348,6 @@ API_AVAILABLE(ios(8.0))
                 [self imageLoadingComplete];
             });
         }];
-    } else {
-        // Fallback on earlier versions
-    }if (@available(iOS 8.0, *)) {
-        PHImageManager *imageManager = [PHImageManager defaultManager];
     } else {
         // Fallback on earlier versions
     }
