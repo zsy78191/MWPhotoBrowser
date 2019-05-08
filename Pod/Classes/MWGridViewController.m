@@ -61,6 +61,12 @@
     [self.collectionView registerClass:[MWGridCell class] forCellWithReuseIdentifier:@"GridCell"];
     self.collectionView.alwaysBounceVertical = YES;
     self.collectionView.backgroundColor = [UIColor blackColor];
+    if (@available(iOS 11.0, *)) {
+
+        self.collectionView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
+
+    }
+   
 }
 
 - (void)viewWillDisappear:(BOOL)animated {

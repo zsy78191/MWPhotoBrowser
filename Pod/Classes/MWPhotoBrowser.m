@@ -1003,10 +1003,12 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
 }
 
 - (CGRect)frameForToolbarAtOrientation:(UIInterfaceOrientation)orientation {
+  
+//     [UIScreen mainScreen].bounds.size.height;
     CGFloat height = 44;
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone &&
-        UIInterfaceOrientationIsLandscape(orientation)) height = 32;
-	return CGRectIntegral(CGRectMake(0, self.view.bounds.size.height - height, self.view.bounds.size.width, height));
+        UIInterfaceOrientationIsLandscape(orientation)) height = 32 ;
+	return CGRectIntegral(CGRectMake(0, self.view.bounds.size.height - height - + [[UIApplication sharedApplication] delegate].window.safeAreaInsets.bottom, self.view.bounds.size.width, height));
 }
 
 - (CGRect)frameForCaptionView:(MWCaptionView *)captionView atIndex:(NSUInteger)index {
@@ -1438,7 +1440,7 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
         
         // Toolbar
         _toolbar.frame = CGRectOffset([self frameForToolbarAtOrientation:self.interfaceOrientation], 0, animatonOffset);
-        
+//        [_toolbar ]
         // Captions
         for (MWZoomingScrollView *page in _visiblePages) {
             if (page.captionView) {
