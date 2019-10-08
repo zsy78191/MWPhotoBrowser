@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
   s.name = 'Fork-MWPhotoBrowser'
-  s.version = '2.1.5.2'
+  s.version = '2.1.5.3'
   s.license = 'MIT'
   s.summary = 'A simple iOS photo and video browser with optional grid view, captions and selections.'
   s.description = <<-DESCRIPTION
@@ -25,7 +25,7 @@ Pod::Spec.new do |s|
 
   s.source = {
     :git => 'https://github.com/zsy78191/MWPhotoBrowser.git',
-    :tag => '2.1.5.2'
+    :tag => '2.1.5.3'
   }
   s.platform = :ios, '8.0'
   s.source_files = 'Pod/Classes/**/*'
@@ -34,7 +34,7 @@ Pod::Spec.new do |s|
   }
   s.requires_arc = true
 
-  s.frameworks = 'ImageIO', 'QuartzCore', 'AssetsLibrary', 'MediaPlayer'
+  s.frameworks = 'ImageIO', 'QuartzCore', 'MediaPlayer'
   s.weak_frameworks = 'Photos'
 
   s.dependency 'MBProgressHUD', '~> 0.9'
