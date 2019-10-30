@@ -10,7 +10,9 @@
 #import <SDWebImage/SDWebImageManager.h>
 #import <SDWebImage/SDWebImageOperation.h>
 #import <SDWebImage/SDWebImageTransition.h>
+#if !TARGET_OS_MACCATALYST
 #import <AssetsLibrary/AssetsLibrary.h>
+#endif
 #import "MWPhoto.h"
 #import "MWPhotoBrowser.h"
 #import "UIImage+MWPhotoBrowser.h"
@@ -42,7 +44,7 @@ API_AVAILABLE(ios(8.0))
 #pragma mark - Class Methods
 
 + (MWPhoto *)photoWithImage:(UIImage *)image {
-	return [[MWPhoto alloc] initWithImage:image];
+    return [[MWPhoto alloc] initWithImage:image];
 }
 
 + (MWPhoto *)photoWithURL:(NSURL *)url {
@@ -191,9 +193,10 @@ API_AVAILABLE(ios(8.0))
         
         // Check what type of url it is
         if ([[[_photoURL scheme] lowercaseString] isEqualToString:@"assets-library"]) {
-            
+            #if !TARGET_OS_MACCATALYST
             // Load from assets library
             [self _performLoadUnderlyingImageAndNotifyWithAssetsLibraryURL: _photoURL];
+            #endif
             
         } else if ([_photoURL isFileReferenceURL]) {
             
@@ -297,6 +300,7 @@ API_AVAILABLE(ios(8.0))
 }
 
 // Load from asset library async
+#if !TARGET_OS_MACCATALYST
 - (void)_performLoadUnderlyingImageAndNotifyWithAssetsLibraryURL:(NSURL *)url {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         @autoreleasepool {
@@ -323,6 +327,7 @@ API_AVAILABLE(ios(8.0))
         }
     });
 }
+#endif
 
 // Load from photos library
 - (void)_performLoadUnderlyingImageAndNotifyWithAsset:(PHAsset *)asset targetSize:(CGSize)targetSize  API_AVAILABLE(ios(8.0)){
@@ -357,7 +362,7 @@ API_AVAILABLE(ios(8.0))
 // Release if we can get it again from path or url
 - (void)unloadUnderlyingImage {
     _loadingInProgress = NO;
-	self.underlyingImage = nil;
+    self.underlyingImage = nil;
 }
 
 - (void)imageLoadingComplete {
