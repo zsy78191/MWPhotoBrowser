@@ -13,6 +13,7 @@
 #import "SDImageCache.h"
 #import "UIImage+MWPhotoBrowser.h"
 
+
 #define PADDING                  10
 
 static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
@@ -1640,34 +1641,41 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
 
 - (MBProgressHUD *)progressHUD {
     if (!_progressHUD) {
-        _progressHUD = [[MBProgressHUD alloc] initWithView:self.view];
+        _progressHUD =  [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         _progressHUD.minSize = CGSizeMake(120, 120);
         _progressHUD.minShowTime = 1;
-        [self.view addSubview:_progressHUD];
+//        [self.view addSubview:_progressHUD];
     }
     return _progressHUD;
 }
 
 - (void)showProgressHUDWithMessage:(NSString *)message {
-    self.progressHUD.labelText = message;
-    self.progressHUD.mode = MBProgressHUDModeIndeterminate;
-    [self.progressHUD show:YES];
+//    self.progressHUD.labelText = message;
+//    self.progressHUD.mode = MBProgressHUDModeIndeterminate;
+//    [self.progressHUD show:YES];
+//    [self.progressHUD showvi]
+//    self.progressHUD =;
+    [self.progressHUD setMode:MBProgressHUDModeIndeterminate];
+    [self.progressHUD.label setText:message];
+    
     self.navigationController.navigationBar.userInteractionEnabled = NO;
 }
 
 - (void)hideProgressHUD:(BOOL)animated {
-    [self.progressHUD hide:animated];
+//    [self.progressHUD hide:animated];
+    [self.progressHUD hideAnimated:animated];
     self.navigationController.navigationBar.userInteractionEnabled = YES;
 }
 
 - (void)showProgressHUDCompleteMessage:(NSString *)message {
     if (message) {
-        if (self.progressHUD.isHidden) [self.progressHUD show:YES];
-        self.progressHUD.labelText = message;
+        if (self.progressHUD.isHidden) [self.progressHUD showAnimated:YES];
+        self.progressHUD.label.text = message;
         self.progressHUD.mode = MBProgressHUDModeCustomView;
-        [self.progressHUD hide:YES afterDelay:1.5];
+        [self.progressHUD hideAnimated:YES afterDelay:1.5];
+        
     } else {
-        [self.progressHUD hide:YES];
+        [self.progressHUD hideAnimated:YES];
     }
     self.navigationController.navigationBar.userInteractionEnabled = YES;
 }

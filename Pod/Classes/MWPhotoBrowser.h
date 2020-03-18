@@ -19,6 +19,7 @@
 #endif
 
 @class MWPhotoBrowser;
+@class MBProgressHUD;
 
 @protocol MWPhotoBrowserDelegate <NSObject>
 
@@ -71,5 +72,7 @@
 // Navigation
 - (void)showNextPhotoAnimated:(BOOL)animated;
 - (void)showPreviousPhotoAnimated:(BOOL)animated;
+
+@property (nonatomic, strong) MBProgressHUD* progressHUD;
 
 @end
