@@ -37,7 +37,7 @@ Pod::Spec.new do |s|
   s.frameworks = 'ImageIO', 'QuartzCore', 'MediaPlayer'
   s.weak_frameworks = 'Photos'
 
-  s.dependency 'MBProgressHUD' , '~> 1.1.0'
+  s.dependency 'MBProgressHUD'
   s.dependency 'DACircularProgress'
 
   # SDWebImage
